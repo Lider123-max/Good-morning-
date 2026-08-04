@@ -1,0 +1,36 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y openjdk-17-jdk unzip zip
+        pip install buildozer cython
+        pip install -r requirements.txt || true
+
+    - name: Build APK with Buildozer
+      run: |
+        buildozer android debug deploy run
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: GameAPK
+        path: bin/*.apk
